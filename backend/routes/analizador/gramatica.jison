@@ -36,7 +36,10 @@
 /lex
 
 %{
-
+    const TIPO_OPERACION = require('../arbol/instrucciones').TIPO_OPERACION;
+    const TIPO_VALOR = require('../arbol/instrucciones').TIPO_VALOR;
+    const INSTRUCCIONES = require('../arbol/instrucciones').INSTRUCCIONES;
+    const TIPO_DATO = require('../arbol/tablasimbolos').TIPO_DATO;
 %}
 
 // Precedencia de operadores
@@ -59,25 +62,25 @@ CUERPO
 
 DECLARACION
     : TIPO identificador menor menos EXP pcoma
-    | TIPO identificador pcoma;
+    | TIPO identificador pcoma ;
 
 IMPRIMIR
-    : imprimir menor menor EXP pcoma;
+    : imprimir menor menor EXP pcoma { $$=INSTRUCCIONES.nuevoImprimir($4); };
 
 TIPO
-    : decimal
-    | cadena
-    | bandera;
+    : decimal                           { $$ = TIPO_DATO.DECIMAL; }
+    | cadena                            { $$ = TIPO_DATO.CADENA; }
+    | bandera                           { $$ = TIPO_DATO.BANDERA; };
 
 EXP
-    : EXP mas EXP
-    | EXP menos EXP
-    | EXP por EXP
-    | EXP dividido EXP
-    | menos EXP
-    | parentesisa EXP parentesisc
-    | decimall
-    | cadenaa
-    | truee
-    | falsee
-    | identificador;
+    : EXP mas EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.SUMA, $1, $3); }
+    | EXP menos EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.RESTA, $1, $3); }
+    | EXP por EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MULTIPLICACION, $1, $3); }
+    | EXP dividido EXP                  { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.DIVISION, $1, $3); }
+    | menos EXP                         { $$ = INSTRUCCIONES.nuevaOperacionUnaria(TIPO_OPERACION.NEGATIVO, $2); }
+    | parentesisa EXP parentesisc       { $$ = $2 }
+    | decimall                          { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.DECIMAL, Number($1)); }
+    | cadenaa                           { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.CADENA, $1); }
+    | truee                             { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.BANDERA, true); }
+    | falsee                            { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.BANDERA, false); }
+    | identificador                     { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.IDENTIFICADOR, $1); };
