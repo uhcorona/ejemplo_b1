@@ -49,7 +49,7 @@
 %% /* Gramatica */
 
 INICIO
-    : CUERPO EOF;
+    : CUERPO EOF { console.log('Funciono'); };
 
 CUERPO
     : CUERPO DECLARACION
