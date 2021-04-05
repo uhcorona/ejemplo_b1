@@ -5,7 +5,7 @@ var parser = require('./analizador/gramatica');
 router.post('/', function(req, res, next) {
     try {
         console.log(req.files.archivo.data.toString('utf-8'));
-        parser.parse(req.files.archivo.data.toString('utf-8'));
+        let arbol = parser.parse(req.files.archivo.data.toString('utf-8'));
         res.statusCode = 200;
         res.json({salida:""});
     }

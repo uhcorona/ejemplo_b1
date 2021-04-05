@@ -44,7 +44,7 @@ const INSTRUCCIONES = {
             tipo: TIPO_INSTRUCCION.DECLARACION,
             tipo_dato:tipo,
             id:id,
-            expresion
+            expresion: expresion
         }
     },
     nuevoImprimir: function(expresion){

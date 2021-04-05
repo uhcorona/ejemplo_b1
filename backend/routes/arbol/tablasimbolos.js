@@ -41,6 +41,7 @@ class TS {
         else{
             //Manejar que devolvorean si no existe
             console.log('No existe la variable: '+id);
+            return undefined;
         }
     }
     get simbolos() {
