@@ -25,7 +25,13 @@ class TS {
         else{
             if(tipo == valor.tipo){
                 // Si hay casteos implicitos aca los verifican
-                this._simbolos.push(crearSimbolo(tipo, id, valor));
+                /*
+                    if(tipo=="decimal" && valor.tipo=="int"){
+                        valor.tipo=="decimal";
+                        valor.valor==Number(valor.valor);
+                    }
+                */
+                this._simbolos.push(crearSimbolo(tipo, id, valor.valor));
             }
             else {
                 // Manejan si el casteo no exites

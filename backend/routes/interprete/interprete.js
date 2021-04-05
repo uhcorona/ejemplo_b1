@@ -4,32 +4,54 @@ const TIPO_VALOR = require('../arbol/instrucciones').TIPO_VALOR;
 const TIPO_DATO = require('../arbol/tablasimbolos').TIPO_DATO;
 
 const TS = require('../arbol/tablasimbolos').TS;
-
+let salida = '';
 
 function ejecutar(arbol){
+    salida='';
     let tsglobal = new TS([]);
-    let salida = '';
+    console.log('Entro')
+    ejecutarbloqueglobal(arbol, tsglobal, undefined);
 
-    ejecutarbloque(arbol, tsglobal, undefined);
+    return salida;
 }
 
-function ejecutarbloque(instrucciones, tsglobal, tslocal){
+function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal){
     instrucciones.forEach((instruccion)=>{
-        if(instrucciones.tipo == TIPO_INSTRUCCION.DECLARACION){
-            //Codigo paa la declaracion
+        if(instruccion.tipo == TIPO_INSTRUCCION.DECLARACION){
+            ejecutardeclaracion(instruccion, tsglobal,tslocal);
         }
-        else if(instrucciones.tipo == TIPO_INSTRUCCION.IMPRIMIR){
-            //cODIGO PARA IMPRIMIR
+        else if(instruccion.tipo == TIPO_INSTRUCCION.IMPRIMIR){
+            ejecutarimprimir(instruccion, tsglobal, tslocal);
         }
+        /*else if(instrucciones.tipo == TIPO_INSTRUCCION.WHILE){
+            ///Aca crean la local
+            ///Aca le agrega a la local lo de la local previa
+            ejecutarwhile(instruccion, tsglobal, tslocal);
+        }*/
     });
 }
 
-function ejecutardeclaracion(instruccion, tsglobal, tslocal){
+/*function ejecutarwhile(instruccion, tsglobal, tslocal){
+    var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
+    while(valor.valor){
+        ejecutarbloqueglobal(instruccion.cuerpo);
+        valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
+    }
+}*/
 
+function ejecutardeclaracion(instruccion, tsglobal, tslocal){
+    console.log('hola')
+    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
+    tsglobal.agregar(instruccion.tipo_dato, instruccion.id, valor);
 }
 
 function ejecutarimprimir(instruccion, tsglobal, tslocal){
+    console.log('hola')
 
+    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
+    console.log(valor)
+    salida+=valor.valor+'\n';
+    console.log(valor.valor);
 }
 
 function procesarexpresion(expresion, tsglobal, tslocal){
@@ -136,6 +158,7 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         else{
             var valorr = tsglobal.obtener(expresion.valor);
             if(valorr){
+                console.log(valorr)
                 return { tipo:valorr.tipo, valor:valorr.valor };
             }
             else {
@@ -144,3 +167,5 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
 }
+
+module.exports.ejecutar = ejecutar;
