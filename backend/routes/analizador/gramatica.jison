@@ -24,6 +24,8 @@
 "cout"                  return 'imprimir';
 "("                     return 'parentesisa';
 ")"                     return 'parentesisc';
+"?"                     return 'signointerrogacion';
+":"                     return 'dospuntos';
 
 \"[^\"]*\"                  { yytext = yytext.substr(1, yyleng-2); return 'cadenaa'; }
 [0-9]+("."[0-9]+)?\b        return 'decimall';
@@ -43,8 +45,10 @@
 %}
 
 // Precedencia de operadores
+%left 'signointerrogacion'
 %left 'mas' 'menos'
 %left 'por' 'dividido'
+%right UCASTEO
 %left UMENOS
 
 %start INICIO
@@ -72,12 +76,17 @@ TIPO
     | cadena                            { $$ = TIPO_DATO.CADENA; }
     | bandera                           { $$ = TIPO_DATO.BANDERA; };
 
+CASTEO
+    : parentesisa TIPO parentesisc EXP %prec UCASTEO;
+
 EXP
     : EXP mas EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.SUMA, $1, $3); }
+    | EXP signointerrogacion EXP dospuntos EXP
+    | CASTEO
     | EXP menos EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.RESTA, $1, $3); }
     | EXP por EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MULTIPLICACION, $1, $3); }
     | EXP dividido EXP                  { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.DIVISION, $1, $3); }
-    | menos EXP                         { $$ = INSTRUCCIONES.nuevaOperacionUnaria(TIPO_OPERACION.NEGATIVO, $2); }
+    | menos EXP %prec UMENOS            { $$ = INSTRUCCIONES.nuevaOperacionUnaria(TIPO_OPERACION.NEGATIVO, $2); }
     | parentesisa EXP parentesisc       { $$ = $2 }
     | decimall                          { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.DECIMAL, Number($1)); }
     | cadenaa                           { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.CADENA, $1); }
