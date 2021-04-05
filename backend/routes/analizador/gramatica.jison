@@ -48,7 +48,6 @@
 %left 'signointerrogacion'
 %left 'mas' 'menos'
 %left 'por' 'dividido'
-%right UCASTEO
 %left UMENOS
 
 %start INICIO
@@ -56,17 +55,17 @@
 %% /* Gramatica */
 
 INICIO
-    : CUERPO EOF { console.log('Funciono'); };
+    : CUERPO EOF { console.log('Funciono'); return $1; };
 
 CUERPO
-    : CUERPO DECLARACION
-    | CUERPO IMPRIMIR
-    | DECLARACION
-    | IMPRIMIR;
+    : CUERPO DECLARACION { $1.push($2); $$=$1; }
+    | CUERPO IMPRIMIR { $1.push($2); $$=$1; }
+    | DECLARACION { $$ = [$1]; }
+    | IMPRIMIR { $$ = [$1]; };
 
 DECLARACION
-    : TIPO identificador menor menos EXP pcoma
-    | TIPO identificador pcoma ;
+    : TIPO identificador menor menos EXP pcoma { $$=INSTRUCCIONES.nuevaDeclaracion($1, $2, $5); }
+    | TIPO identificador pcoma { $$=INSTRUCCIONES.nuevaDeclaracion($1, $2, undefined); };
 
 IMPRIMIR
     : imprimir menor menor EXP pcoma { $$=INSTRUCCIONES.nuevoImprimir($4); };
@@ -76,13 +75,8 @@ TIPO
     | cadena                            { $$ = TIPO_DATO.CADENA; }
     | bandera                           { $$ = TIPO_DATO.BANDERA; };
 
-CASTEO
-    : parentesisa TIPO parentesisc EXP %prec UCASTEO;
-
 EXP
     : EXP mas EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.SUMA, $1, $3); }
-    | EXP signointerrogacion EXP dospuntos EXP
-    | CASTEO
     | EXP menos EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.RESTA, $1, $3); }
     | EXP por EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MULTIPLICACION, $1, $3); }
     | EXP dividido EXP                  { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.DIVISION, $1, $3); }
