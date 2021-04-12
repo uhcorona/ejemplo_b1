@@ -6,8 +6,10 @@ var interprete = require('./interprete/interprete').ejecutar;
 router.post('/', function(req, res, next) {
     let salida="";
     try {
-        console.log(req.files.archivo.data.toString('utf-8'));
-        let arbol = parser.parse(req.files.archivo.data.toString('utf-8'));
+        //console.log(req.files.archivo.data.toString('utf-8'));
+        //let arbol = parser.parse(req.files.archivo.data.toString('utf-8'));
+        var codigo = req.body.prueba;
+        let arbol = parser.parse(codigo);
         salida = interprete(arbol);
         res.statusCode = 200;
         res.json({salida:salida});
