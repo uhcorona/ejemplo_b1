@@ -19,13 +19,23 @@
 "*"                     return 'por';
 "/"                     return 'dividido';
 "<"                     return 'menor';
+">"                     return 'mayor';
+"<="                     return 'menorigual';
+">="                     return 'mayorigual';
+"=="                     return 'igualigual';
+"!="                     return 'noigual';
 "true"                  return 'truee';
 "false"                 return 'falsee';
 "cout"                  return 'imprimir';
+"mientras"              return 'mientras';
+"{"                     return 'llavea';
+"}"                     return 'llavec';
 "("                     return 'parentesisa';
 ")"                     return 'parentesisc';
 "?"                     return 'signointerrogacion';
 ":"                     return 'dospuntos';
+"si"                    return 'si';
+"sino"                  return 'sino';
 
 \"[^\"]*\"                  { yytext = yytext.substr(1, yyleng-2); return 'cadenaa'; }
 [0-9]+("."[0-9]+)?\b        return 'decimall';
@@ -45,10 +55,11 @@
 %}
 
 // Precedencia de operadores
-%left 'signointerrogacion'
+%left 'menor' 'menorigual' 'mayor' 'mayorigual' 'igualigual' 'noigual'
 %left 'mas' 'menos'
 %left 'por' 'dividido'
 %left UMENOS
+
 
 %start INICIO
 
@@ -60,8 +71,12 @@ INICIO
 CUERPO
     : CUERPO DECLARACION { $1.push($2); $$=$1; }
     | CUERPO IMPRIMIR { $1.push($2); $$=$1; }
+    | CUERPO WHILEE { $1.push($2); $$=$1; }
+    | CUERPO SI { $1.push($2); $$=$1; }
     | DECLARACION { $$ = [$1]; }
-    | IMPRIMIR { $$ = [$1]; };
+    | IMPRIMIR { $$ = [$1]; }
+    | SI { $$=[$1]; }
+    | WHILEE { $$=[$1]; };
 
 DECLARACION
     : TIPO identificador menor menos EXP pcoma { $$=INSTRUCCIONES.nuevaDeclaracion($1, $2, $5); }
@@ -69,6 +84,13 @@ DECLARACION
 
 IMPRIMIR
     : imprimir menor menor EXP pcoma { $$=INSTRUCCIONES.nuevoImprimir($4); };
+
+WHILEE
+    : mientras parentesisa EXP parentesisc llavea CUERPO llavec{ $$=INSTRUCCIONES.nuevoWhile($3, $6); };
+
+SI
+    :si parentesisa EXP parentesisc llavea CUERPO llavec sino llavea CUERPO llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, $10); }
+    |si parentesisa EXP parentesisc llavea CUERPO llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, undefined); };
 
 TIPO
     : decimal                           { $$ = TIPO_DATO.DECIMAL; }
@@ -80,7 +102,12 @@ EXP
     | EXP menos EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.RESTA, $1, $3); }
     | EXP por EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MULTIPLICACION, $1, $3); }
     | EXP dividido EXP                  { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.DIVISION, $1, $3); }
-    | EXP menor EXP
+    | EXP menor EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MENOR, $1, $3); }
+    | EXP mayor EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MAYOR, $1, $3); }
+    | EXP menorigual EXP                { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MENORIGUAL, $1, $3); }
+    | EXP mayorigual EXP                { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MAYORIGUAL, $1, $3); }
+    | EXP igualigual EXP                { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.IGUALIGUAL, $1, $3); }
+    | EXP noigual EXP                   { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.NOIGUAL, $1, $3); }
     | menos EXP %prec UMENOS            { $$ = INSTRUCCIONES.nuevaOperacionUnaria(TIPO_OPERACION.NEGATIVO, $2); }
     | parentesisa EXP parentesisc       { $$ = $2 }
     | decimall                          { $$ = INSTRUCCIONES.nuevoValor(TIPO_VALOR.DECIMAL, Number($1)); }

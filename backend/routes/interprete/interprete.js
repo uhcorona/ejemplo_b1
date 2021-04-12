@@ -23,21 +23,34 @@ function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal){
         else if(instruccion.tipo == TIPO_INSTRUCCION.IMPRIMIR){
             ejecutarimprimir(instruccion, tsglobal, tslocal);
         }
-        /*else if(instrucciones.tipo == TIPO_INSTRUCCION.WHILE){
-            ///Aca crean la local
-            ///Aca le agrega a la local lo de la local previa
+        else if(instruccion.tipo == TIPO_INSTRUCCION.WHILEE){
             ejecutarwhile(instruccion, tsglobal, tslocal);
-        }*/
+        }
+        else if(instruccion.tipo == TIPO_INSTRUCCION.IFF){
+            ejecutarif(instruccion, tsglobal, tslocal);
+        }
     });
 }
 
-/*function ejecutarwhile(instruccion, tsglobal, tslocal){
+function ejecutarif(instruccion, tsglobal, tslocal){
+    var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
+    if(valor.valor==true){
+        ejecutarbloqueglobal(instruccion.cuerpoverdadero,tsglobal,tslocal);
+    }
+    else if(valor.valor==false){
+        if(instruccion.cuerpofalso!=undefined){
+            ejecutarbloqueglobal(instruccion.cuerpofalso,tsglobal,tslocal);
+        }
+    }
+}
+
+function ejecutarwhile(instruccion, tsglobal, tslocal){
     var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
     while(valor.valor){
-        ejecutarbloqueglobal(instruccion.cuerpo);
+        ejecutarbloqueglobal(instruccion.instrucciones,tsglobal,tslocal);
         valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
     }
-}*/
+}
 
 function ejecutardeclaracion(instruccion, tsglobal, tslocal){
     console.log('hola')
@@ -117,6 +130,308 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         else {
             console.log('Error semantico los tipos no se pueden dividir');
             return undefined;
+        }
+    }
+    else if(expresion.tipo == TIPO_OPERACION.MENOR){
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        switch(valorIzq.tipo){
+            case TIPO_DATO.DECIMAL:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        //if(3.0<5.0)
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor<valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        //if(3.0<"hola")
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        //if(3.0<true)
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.CADENA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.BANDERA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+        }
+    }
+    else if(expresion.tipo == TIPO_OPERACION.MAYOR){
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        switch(valorIzq.tipo){
+            case TIPO_DATO.DECIMAL:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        //if(3.0<5.0)
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor>valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        //if(3.0<"hola")
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        //if(3.0<true)
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.CADENA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.BANDERA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+        }
+    }
+    else if(expresion.tipo == TIPO_OPERACION.MENORIGUAL){
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        switch(valorIzq.tipo){
+            case TIPO_DATO.DECIMAL:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        //if(3.0<5.0)
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor<=valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        //if(3.0<"hola")
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        //if(3.0<true)
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.CADENA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.BANDERA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+        }
+    }
+    else if(expresion.tipo == TIPO_OPERACION.MAYORIGUAL){
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        switch(valorIzq.tipo){
+            case TIPO_DATO.DECIMAL:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        //if(3.0<5.0)
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor>=valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        //if(3.0<"hola")
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        //if(3.0<true)
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.CADENA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.BANDERA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+        }
+    }
+    else if(expresion.tipo == TIPO_OPERACION.IGUALIGUAL){
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        switch(valorIzq.tipo){
+            case TIPO_DATO.DECIMAL:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        //if(3.0<5.0)
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor==valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        //if(3.0=="hola")
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        //if(3.0<true)
+                        var valor2;
+                        if(valorDer.valor==true){
+                            valor2=1;
+                        }
+                        else if(valorDer.valor==false){
+                            valor2=0;
+                        }
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor==valor2 };
+                }
+                break;
+            case TIPO_DATO.CADENA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor==valorDer.valor };
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.BANDERA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        var valor1;
+                        if(valorIzq.valor==true){
+                            valor1=1;
+                        }
+                        else if(valorIzq.valor==false){
+                            valor1=0;
+                        }
+                        return { tipo:TIPO_DATO.BANDERA, valor: valor1==valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor==valorDer.valor };
+                }
+                break;
+        }
+    }
+    else if(expresion.tipo == TIPO_OPERACION.NOIGUAL){
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        switch(valorIzq.tipo){
+            case TIPO_DATO.DECIMAL:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        //if(3.0<5.0)
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor!=valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        //if(3.0=="hola")
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        //if(3.0<true)
+                        var valor2;
+                        if(valorDer.valor==true){
+                            valor2=1;
+                        }
+                        else if(valorDer.valor==false){
+                            valor2=0;
+                        }
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor!=valor2 };
+                }
+                break;
+            case TIPO_DATO.CADENA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.CADENA:
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor!=valorDer.valor };
+                    case TIPO_DATO.BANDERA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                }
+                break;
+            case TIPO_DATO.BANDERA:
+                switch(valorDer.tipo){
+                    case TIPO_DATO.DECIMAL:
+                        var valor1;
+                        if(valorIzq.valor==true){
+                            valor1=1;
+                        }
+                        else if(valorIzq.valor==false){
+                            valor1=0;
+                        }
+                        return { tipo:TIPO_DATO.BANDERA, valor: valor1!=valorDer.valor };
+                    case TIPO_DATO.CADENA:
+                        console.log('Error semantico los tipos no se pueden operar en el caso del menor');
+                        return undefined;
+                    case TIPO_DATO.BANDERA:
+                        return { tipo:TIPO_DATO.BANDERA, valor: valorIzq.valor!=valorDer.valor };
+                }
+                break;
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.NEGATIVO){
