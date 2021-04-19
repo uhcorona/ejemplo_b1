@@ -184,11 +184,8 @@ export class AppComponent {
 
     formData.append('archivo', new Blob([this.tabs[this.selected.value].formm.value], { type: "text/plain" }), nombre);
 
-    this.http.post('http://localhost:3000/compilar', formData, { responseType: 'text' }).subscribe(res => {
-      this.editor2.setValue(res.toString())
-      this.http.post('http://localhost:3000/errores', formData, { responseType: 'text' }).subscribe(res => {
-        this.editor3.setValue(res.toString())
-      })
+    this.http.post('http://localhost:3000/compilar', formData, { responseType: 'text' }).subscribe((res:any) => {
+    this.editor2.setValue(JSON.parse(res).salida)
     })
   }
 

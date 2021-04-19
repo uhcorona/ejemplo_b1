@@ -1,3 +1,5 @@
+const { TIPO_VALOR } = require("./instrucciones");
+
 const TIPO_DATO = {
     DECIMAL:        'VAL_DECIMAL',
     CADENA:         'VAL_CADENA',
@@ -48,6 +50,59 @@ class TS {
             //Manejar que devolvorean si no existe
             console.log('No existe la variable: '+id);
             return undefined;
+        }
+    }
+    actualizar(id, valor){
+        var simbolo = this._simbolos.filter(simbolo=>simbolo.id == id)[0];
+        if(simbolo){
+            if(simbolo.tipo == valor.tipo){
+                simbolo.valor=valor.valor;
+            }
+            else{
+                // a=3; donde a es un decimal EN ESTA PARTE VERIFICAN LOS POSIBLES CASTEOS
+                switch(simbolo.tipo){
+                    case TIPO_VALOR.DECIMAL:
+                        switch(valor.tipo){
+                            case TIPO_VALOR.CADENA:
+                                console.log('No se pudo actualizar por tipos incompatibles');
+                                return;
+                            case TIPO_VALOR.BANDERA:
+                                if(valor.valor==true){
+                                    simbolo.valor=1;
+                                }
+                                else if (valor.valor==false){
+                                    simbolo.valor=0;
+                                }
+                                break;
+                        }
+                        break;
+                    case TIPO_VALOR.CADENA:
+                        switch(valor.tipo){
+                            case TIPO_VALOR.DECIMAL:
+                                console.log('No se pudo actualizar por tipos incompatibles');
+                                return;
+                            case TIPO_VALOR.BANDERA:
+                                console.log('No se pudo actualizar por tipos incompatibles');
+                                return;
+                        }
+                        break;
+                    case TIPO_VALOR.BANDERA:
+                        switch(valor.tipo){
+                            case TIPO_VALOR.DECIMAL:
+                                if(valor.valor==1){
+                                    simbolo.valor=true;
+                                }
+                                else if (valor.valor==0){
+                                    simbolo.valor=false;
+                                }
+                                return;
+                            case TIPO_VALOR.CADENA:
+                                console.log('No se pudo actualizar por tipos incompatibles');
+                                return;
+                        }
+                        break;
+                }
+            }
         }
     }
     get simbolos() {

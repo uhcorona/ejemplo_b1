@@ -29,6 +29,9 @@ function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal){
         else if(instruccion.tipo == TIPO_INSTRUCCION.IFF){
             ejecutarif(instruccion, tsglobal, tslocal);
         }
+        else if(instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION){
+            ejecutarasignacion(instruccion, tsglobal, tslocal);
+        }
     });
 }
 
@@ -53,7 +56,6 @@ function ejecutarwhile(instruccion, tsglobal, tslocal){
 }
 
 function ejecutardeclaracion(instruccion, tsglobal, tslocal){
-    console.log('hola')
     var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
     tsglobal.agregar(instruccion.tipo_dato, instruccion.id, valor);
 }
@@ -65,6 +67,16 @@ function ejecutarimprimir(instruccion, tsglobal, tslocal){
     console.log(valor)
     salida+=valor.valor+'\n';
     console.log(valor.valor);
+}
+
+function ejecutarasignacion(instruccion, tsglobal, tslocal){
+    var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal);
+    /*if(tslocal.obtener(instruccion.identificador)!=undefined){
+        tslocal.actualizar(instruccion.identificador, valor);
+    }
+    else */if(tsglobal.obtener(instruccion.identificador)!=undefined){
+        tsglobal.actualizar(instruccion.identificador, valor);
+    }
 }
 
 function procesarexpresion(expresion, tsglobal, tslocal){

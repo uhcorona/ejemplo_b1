@@ -23,7 +23,8 @@ const TIPO_INSTRUCCION = {
     IMPRIMIR:           'INSTR_IMPRIMIR',
     DECLARACION:        'INSTR_DECLARACION',
     WHILEE:             'INSTR_WHILE',
-    IFF:                'INSTR_IF'
+    IFF:                'INSTR_IF',
+    ASIGNACION:         'INSTR_ASIGNACION'
 }
 
 const INSTRUCCIONES = {
@@ -74,6 +75,13 @@ const INSTRUCCIONES = {
             condicion: condicion,
             cuerpoverdadero: cuerpoverdadero,
             cuerpofalso: cuerpofalso
+        }
+    },
+    nuevaAsignacion: function(identificador, expresion){
+        return {
+            tipo: TIPO_INSTRUCCION.ASIGNACION,
+            identificador: identificador,
+            expresion: expresion
         }
     }
 }

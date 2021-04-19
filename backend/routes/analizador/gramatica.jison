@@ -73,10 +73,15 @@ CUERPO
     | CUERPO IMPRIMIR { $1.push($2); $$=$1; }
     | CUERPO WHILEE { $1.push($2); $$=$1; }
     | CUERPO SI { $1.push($2); $$=$1; }
+    | CUERPO ASIGNACION { $1.push($2); $$=$1; }
     | DECLARACION { $$ = [$1]; }
     | IMPRIMIR { $$ = [$1]; }
     | SI { $$=[$1]; }
-    | WHILEE { $$=[$1]; };
+    | WHILEE { $$=[$1]; }
+    | ASIGNACION { $$=[$1]; };
+
+ASIGNACION
+    : identificador menor menos EXP pcoma { $$ = INSTRUCCIONES.nuevaAsignacion($1, $4); } ;
 
 DECLARACION
     : TIPO identificador menor menos EXP pcoma { $$=INSTRUCCIONES.nuevaDeclaracion($1, $2, $5); }
