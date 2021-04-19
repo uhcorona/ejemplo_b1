@@ -7,18 +7,57 @@ const TS = require('../arbol/tablasimbolos').TS;
 let salida = '';
 
 function ejecutar(arbol){
+    console.log(arbol);
     salida='';
     let tsglobal = new TS([]);
+    let tslocal = new TS([]);
+    let metodos = [];
+    let main = [];
     console.log('Entro')
-    ejecutarbloqueglobal(arbol, tsglobal, undefined);
-
+    ejecutarbloqueglobal(arbol, tsglobal, tslocal, metodos, main);
+    if(main.length==1){
+        console.log(metodos);
+        metodos.forEach(metodo2=>{
+            if(metodo2.identificador==main[0].identificador){
+                //Esto es para manejar ambitos
+            //Aca agregamos los parametros recibidos a la local
+            //tslocal2=new TS([]);
+            //tslocal2.add(tslocal);
+            //tslocal2.add(parametros);
+            //ejecutarbloquelocal(main2.instrucciones, tsglobal, tslocal2)
+                ejecutarbloquelocal(metodo2.instrucciones, tsglobal, tslocal);
+            }
+        });
+    }
+    else{
+        console.log(main.length)
+        console.log("No puede haber mas de un main");
+    }
     return salida;
 }
 
-function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal){
+function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal, metodos, main){
     instrucciones.forEach((instruccion)=>{
         if(instruccion.tipo == TIPO_INSTRUCCION.DECLARACION){
-            ejecutardeclaracion(instruccion, tsglobal,tslocal);
+            ejecutardeclaracionglobal(instruccion, tsglobal,tslocal);
+        }
+        else if(instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION){
+            ejecutarasignacionglobal(instruccion, tsglobal, tslocal);
+        }
+        else if(instruccion.tipo == TIPO_INSTRUCCION.METODO){
+            metodos.push(instruccion);
+        }
+        else if(instruccion.tipo==TIPO_INSTRUCCION.MAIN){
+            console.log('si entroooooooo')
+            main.push(instruccion);
+        }
+    });
+}
+
+function ejecutarbloquelocal(instrucciones, tsglobal, tslocal){
+    instrucciones.forEach((instruccion)=>{
+        if(instruccion.tipo == TIPO_INSTRUCCION.DECLARACION){
+            ejecutardeclaracionlocal(instruccion, tsglobal,tslocal);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.IMPRIMIR){
             ejecutarimprimir(instruccion, tsglobal, tslocal);
@@ -30,7 +69,7 @@ function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal){
             ejecutarif(instruccion, tsglobal, tslocal);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION){
-            ejecutarasignacion(instruccion, tsglobal, tslocal);
+            ejecutarasignacionlocal(instruccion, tsglobal, tslocal);
         }
     });
 }
@@ -55,9 +94,14 @@ function ejecutarwhile(instruccion, tsglobal, tslocal){
     }
 }
 
-function ejecutardeclaracion(instruccion, tsglobal, tslocal){
+function ejecutardeclaracionglobal(instruccion, tsglobal, tslocal){
     var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
     tsglobal.agregar(instruccion.tipo_dato, instruccion.id, valor);
+}
+
+function ejecutardeclaracionlocal(instruccion, tsglobal, tslocal){
+    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
+    tslocal.agregar(instruccion.tipo_dato, instruccion.id, valor);
 }
 
 function ejecutarimprimir(instruccion, tsglobal, tslocal){
@@ -69,12 +113,19 @@ function ejecutarimprimir(instruccion, tsglobal, tslocal){
     console.log(valor.valor);
 }
 
-function ejecutarasignacion(instruccion, tsglobal, tslocal){
+function ejecutarasignacionglobal(instruccion, tsglobal, tslocal){
     var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal);
-    /*if(tslocal.obtener(instruccion.identificador)!=undefined){
+    if(tsglobal.obtener(instruccion.identificador)!=undefined){
+        tsglobal.actualizar(instruccion.identificador, valor);
+    }
+}
+
+function ejecutarasignacionlocal(instruccion, tsglobal, tslocal){
+    var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal);
+    if(tslocal.obtener(instruccion.identificador)!=undefined){
         tslocal.actualizar(instruccion.identificador, valor);
     }
-    else */if(tsglobal.obtener(instruccion.identificador)!=undefined){
+    else if(tsglobal.obtener(instruccion.identificador)!=undefined){
         tsglobal.actualizar(instruccion.identificador, valor);
     }
 }

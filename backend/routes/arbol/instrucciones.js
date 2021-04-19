@@ -24,7 +24,9 @@ const TIPO_INSTRUCCION = {
     DECLARACION:        'INSTR_DECLARACION',
     WHILEE:             'INSTR_WHILE',
     IFF:                'INSTR_IF',
-    ASIGNACION:         'INSTR_ASIGNACION'
+    ASIGNACION:         'INSTR_ASIGNACION',
+    METODO:             'INSTR_METODO',
+    MAIN:               'INSTR_MAIN'
 }
 
 const INSTRUCCIONES = {
@@ -82,6 +84,21 @@ const INSTRUCCIONES = {
             tipo: TIPO_INSTRUCCION.ASIGNACION,
             identificador: identificador,
             expresion: expresion
+        }
+    },
+    nuevoMetodo: function(identificador, parametros, instrucciones){
+        return {
+            tipo: TIPO_INSTRUCCION.METODO,
+            identificador: identificador,
+            parametros: parametros,
+            instrucciones: instrucciones
+        }
+    },
+    nuevoMain: function(identificador, parametros){
+        return{
+            tipo: TIPO_INSTRUCCION.MAIN,
+            identificador: identificador,
+            parametros: parametros
         }
     }
 }

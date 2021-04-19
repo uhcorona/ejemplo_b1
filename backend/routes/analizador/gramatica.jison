@@ -18,12 +18,13 @@
 "+"                     return 'mas';
 "*"                     return 'por';
 "/"                     return 'dividido';
+"<="                    return 'menorigual';
+">="                    return 'mayorigual';
+"=="                    return 'igualigual';
+"!="                    return 'noigual';
 "<"                     return 'menor';
 ">"                     return 'mayor';
-"<="                     return 'menorigual';
-">="                     return 'mayorigual';
-"=="                     return 'igualigual';
-"!="                     return 'noigual';
+"="                     return 'igual';
 "true"                  return 'truee';
 "false"                 return 'falsee';
 "cout"                  return 'imprimir';
@@ -36,6 +37,7 @@
 ":"                     return 'dospuntos';
 "si"                    return 'si';
 "sino"                  return 'sino';
+"exec"                  return 'exec';
 
 \"[^\"]*\"                  { yytext = yytext.substr(1, yyleng-2); return 'cadenaa'; }
 [0-9]+("."[0-9]+)?\b        return 'decimall';
@@ -70,15 +72,31 @@ INICIO
 
 CUERPO
     : CUERPO DECLARACION { $1.push($2); $$=$1; }
-    | CUERPO IMPRIMIR { $1.push($2); $$=$1; }
-    | CUERPO WHILEE { $1.push($2); $$=$1; }
-    | CUERPO SI { $1.push($2); $$=$1; }
     | CUERPO ASIGNACION { $1.push($2); $$=$1; }
+    | CUERPO METODO { $1.push($2); $$=$1; }
+    | CUERPO MAIN { $1.push($2); $$=$1; }
+    | DECLARACION { $$ = [$1]; }
+    | ASIGNACION { $$=[$1]; }
+    | METODO { $$=[$1]; }
+    | MAIN { $$=[$1]; };
+
+CUERPO2
+    : CUERPO2 DECLARACION { $1.push($2); $$=$1; }
+    | CUERPO2 IMPRIMIR { $1.push($2); $$=$1; }
+    | CUERPO2 WHILEE { $1.push($2); $$=$1; }
+    | CUERPO2 SI { $1.push($2); $$=$1; }
+    | CUERPO2 ASIGNACION { $1.push($2); $$=$1; }
     | DECLARACION { $$ = [$1]; }
     | IMPRIMIR { $$ = [$1]; }
     | SI { $$=[$1]; }
     | WHILEE { $$=[$1]; }
     | ASIGNACION { $$=[$1]; };
+
+MAIN
+    :exec identificador parentesisa parentesisc pcoma {$$=INSTRUCCIONES.nuevoMain($2, []);};
+
+METODO
+    : identificador igual mayor parentesisa parentesisc llavea CUERPO2 llavec {$$=INSTRUCCIONES.nuevoMetodo($1, [], $7)};
 
 ASIGNACION
     : identificador menor menos EXP pcoma { $$ = INSTRUCCIONES.nuevaAsignacion($1, $4); } ;
@@ -91,11 +109,11 @@ IMPRIMIR
     : imprimir menor menor EXP pcoma { $$=INSTRUCCIONES.nuevoImprimir($4); };
 
 WHILEE
-    : mientras parentesisa EXP parentesisc llavea CUERPO llavec{ $$=INSTRUCCIONES.nuevoWhile($3, $6); };
+    : mientras parentesisa EXP parentesisc llavea CUERPO2 llavec{ $$=INSTRUCCIONES.nuevoWhile($3, $6); };
 
 SI
-    :si parentesisa EXP parentesisc llavea CUERPO llavec sino llavea CUERPO llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, $10); }
-    |si parentesisa EXP parentesisc llavea CUERPO llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, undefined); };
+    :si parentesisa EXP parentesisc llavea CUERPO2 llavec sino llavea CUERPO2 llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, $10); }
+    |si parentesisa EXP parentesisc llavea CUERPO2 llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, undefined); };
 
 TIPO
     : decimal                           { $$ = TIPO_DATO.DECIMAL; }
