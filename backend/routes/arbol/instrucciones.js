@@ -26,7 +26,8 @@ const TIPO_INSTRUCCION = {
     IFF:                'INSTR_IF',
     ASIGNACION:         'INSTR_ASIGNACION',
     METODO:             'INSTR_METODO',
-    MAIN:               'INSTR_MAIN'
+    MAIN:               'INSTR_MAIN',
+    LLAMADA:            'INSTR_LLAMADA'
 }
 
 const INSTRUCCIONES = {
@@ -99,6 +100,19 @@ const INSTRUCCIONES = {
             tipo: TIPO_INSTRUCCION.MAIN,
             identificador: identificador,
             parametros: parametros
+        }
+    },
+    nuevaLlamada: function(identificador, parametros){
+        return{
+            tipo: TIPO_INSTRUCCION.LLAMADA,
+            identificador: identificador,
+            parametros: parametros
+        }
+    },
+    nuevoParametro: function(tipo, identificador){
+        return{
+            tipo: tipo,
+            identificador: identificador
         }
     }
 }

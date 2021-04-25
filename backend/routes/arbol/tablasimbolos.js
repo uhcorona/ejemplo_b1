@@ -16,7 +16,8 @@ function crearSimbolo(tipo, id, valor){
 
 class TS {
     constructor(simbolos) {
-        this._simbolos = simbolos;
+        this._simbolos = [];
+        this._simbolos = this._simbolos.concat(simbolos);
     }
     agregar(tipo, id, valor){
         var simbolo = this._simbolos.filter((simbolo)=>simbolo.id==id)[0];

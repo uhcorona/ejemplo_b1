@@ -7,30 +7,45 @@ const TS = require('../arbol/tablasimbolos').TS;
 let salida = '';
 
 function ejecutar(arbol){
-    console.log(arbol);
     salida='';
     let tsglobal = new TS([]);
     let tslocal = new TS([]);
     let metodos = [];
     let main = [];
-    console.log('Entro')
     ejecutarbloqueglobal(arbol, tsglobal, tslocal, metodos, main);
     if(main.length==1){
-        console.log(metodos);
         metodos.forEach(metodo2=>{
             if(metodo2.identificador==main[0].identificador){
-                //Esto es para manejar ambitos
-            //Aca agregamos los parametros recibidos a la local
-            //tslocal2=new TS([]);
-            //tslocal2.add(tslocal);
-            //tslocal2.add(parametros);
-            //ejecutarbloquelocal(main2.instrucciones, tsglobal, tslocal2)
-                ejecutarbloquelocal(metodo2.instrucciones, tsglobal, tslocal);
+                /*Sobrecarga de metodos (NO SE HACE EN ESTE PROYECTO) puede servir en compi2
+                    cadena1 = tipo (de todos los identificadores del metodo)
+                    cadena2 = tipo (de todos los valores de la llamada)
+                    cadena1==cadena2 (sobrecarga hacia match)
+                */
+                if(metodo2.parametros.length==main[0].parametros.length){
+                    var valoresmetodo = [];
+                    for(var contador = 0; contador<main[0].parametros.length;contador++){
+                        var valor = procesarexpresion(main[0].parametros[contador],tsglobal, tslocal);
+                        if(valor.tipo != metodo2.parametros[contador].tipo){
+                            //Error el valor mandado no es el mismo que se declaro
+                            return;
+                        }
+                        else{
+                            valoresmetodo.push(valor);
+                        }       
+                    }
+                    var tslocal2=new TS([]);
+                    for(var contador=0;contador<main[0].parametros.length;contador++){
+                        tslocal2.agregar(valoresmetodo[contador].tipo, metodo2.parametros[contador].identificador,valoresmetodo[contador]);
+                    }
+                    ejecutarbloquelocal(metodo2.instrucciones, tsglobal, tslocal2, metodos);
+                }
+                else{
+                    //Error se estan mandando una cantidad de valores mayor a la que recibe el metodo
+                }
             }
         });
     }
     else{
-        console.log(main.length)
         console.log("No puede haber mas de un main");
     }
     return salida;
@@ -48,92 +63,131 @@ function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal, metodos, main){
             metodos.push(instruccion);
         }
         else if(instruccion.tipo==TIPO_INSTRUCCION.MAIN){
-            console.log('si entroooooooo')
             main.push(instruccion);
         }
     });
 }
 
-function ejecutarbloquelocal(instrucciones, tsglobal, tslocal){
+function ejecutarbloquelocal(instrucciones, tsglobal, tslocal, metodos){
     instrucciones.forEach((instruccion)=>{
         if(instruccion.tipo == TIPO_INSTRUCCION.DECLARACION){
-            ejecutardeclaracionlocal(instruccion, tsglobal,tslocal);
+            ejecutardeclaracionlocal(instruccion, tsglobal,tslocal, metodos);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.IMPRIMIR){
-            ejecutarimprimir(instruccion, tsglobal, tslocal);
+            ejecutarimprimir(instruccion, tsglobal, tslocal, metodos);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.WHILEE){
-            ejecutarwhile(instruccion, tsglobal, tslocal);
+            var tslocal2=new TS(tslocal._simbolos);
+            ejecutarwhile(instruccion, tsglobal, tslocal2, metodos);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.IFF){
-            ejecutarif(instruccion, tsglobal, tslocal);
+            var tslocal2=new TS(tslocal._simbolos);
+            console.log('ufff')
+            console.log(tslocal._simbolos);
+            console.log(tslocal2._simbolos);
+            ejecutarif(instruccion, tsglobal, tslocal2, metodos);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION){
-            ejecutarasignacionlocal(instruccion, tsglobal, tslocal);
+            ejecutarasignacionlocal(instruccion, tsglobal, tslocal, metodos);
+        }
+        else if(instruccion.tipo == TIPO_INSTRUCCION.LLAMADA){
+            ejecutarllamada(instruccion, tsglobal, tslocal, metodos);
         }
     });
 }
 
-function ejecutarif(instruccion, tsglobal, tslocal){
-    var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
+function ejecutarllamada(instruccion, tsglobal, tslocal, metodos){
+    metodos.forEach(metodo2=>{
+        if(metodo2.identificador==instruccion.identificador){
+            /*Sobrecarga de metodos (NO SE HACE EN ESTE PROYECTO) puede servir en compi2
+                cadena1 = tipo (de todos los identificadores del metodo)
+                cadena2 = tipo (de todos los valores de la llamada)
+                cadena1==cadena2 (sobrecarga hacia match)
+            */
+            if(metodo2.parametros.length==instruccion.parametros.length){
+                var valoresmetodo = [];
+                for(var contador = 0; contador<instruccion.parametros.length;contador++){
+                    var valor = procesarexpresion(instruccion.parametros[contador],tsglobal, tslocal, metodos);
+                    if(valor.tipo != metodo2.parametros[contador].tipo){
+                        //Error el valor mandado no es el mismo que se declaro
+                        return;
+                    }
+                    else{
+                        valoresmetodo.push(valor);
+                    }       
+                }
+                var tslocal2=new TS([]);
+                for(var contador=0;contador<instruccion.parametros.length;contador++){
+                    tslocal2.agregar(valoresmetodo[contador].tipo, metodo2.parametros[contador].identificador,valoresmetodo[contador]);
+                }
+                console.log(tslocal2._simbolos);
+                ejecutarbloquelocal(metodo2.instrucciones, tsglobal, tslocal2, metodos);
+            }
+            else{
+                //Error se estan mandando una cantidad de valores mayor a la que recibe el metodo
+            }
+        }
+    });
+}
+
+function ejecutarif(instruccion, tsglobal, tslocal, metodos){
+    var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal, metodos);
     if(valor.valor==true){
-        ejecutarbloqueglobal(instruccion.cuerpoverdadero,tsglobal,tslocal);
+        ejecutarbloquelocal(instruccion.cuerpoverdadero,tsglobal,tslocal, metodos);
     }
     else if(valor.valor==false){
         if(instruccion.cuerpofalso!=undefined){
-            ejecutarbloqueglobal(instruccion.cuerpofalso,tsglobal,tslocal);
+            ejecutarbloquelocal(instruccion.cuerpofalso,tsglobal,tslocal, metodos);
         }
     }
 }
 
-function ejecutarwhile(instruccion, tsglobal, tslocal){
-    var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
+function ejecutarwhile(instruccion, tsglobal, tslocal, metodos){
+    var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal, metodos);
     while(valor.valor){
-        ejecutarbloqueglobal(instruccion.instrucciones,tsglobal,tslocal);
-        valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal);
+        ejecutarbloquelocal(instruccion.instrucciones,tsglobal,tslocal, metodos);
+        valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal, metodos);
     }
 }
 
-function ejecutardeclaracionglobal(instruccion, tsglobal, tslocal){
-    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
-    tsglobal.agregar(instruccion.tipo_dato, instruccion.id, valor);
+function ejecutardeclaracionglobal(instruccion, tsglobal, tslocal, metodos){
+    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal, metodos);
+    tsglobal.agregar(instruccion.tipo_dato, instruccion.id, valor, metodos);
 }
 
-function ejecutardeclaracionlocal(instruccion, tsglobal, tslocal){
-    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
-    tslocal.agregar(instruccion.tipo_dato, instruccion.id, valor);
+function ejecutardeclaracionlocal(instruccion, tsglobal, tslocal, metodos){
+    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal, metodos);
+    tslocal.agregar(instruccion.tipo_dato, instruccion.id, valor, metodos);
 }
 
-function ejecutarimprimir(instruccion, tsglobal, tslocal){
-    console.log('hola')
+function ejecutarimprimir(instruccion, tsglobal, tslocal, metodos){
 
-    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal);
-    console.log(valor)
+    var valor = procesarexpresion(instruccion.expresion, tsglobal,tslocal, metodos);
     salida+=valor.valor+'\n';
     console.log(valor.valor);
 }
 
-function ejecutarasignacionglobal(instruccion, tsglobal, tslocal){
-    var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal);
+function ejecutarasignacionglobal(instruccion, tsglobal, tslocal, metodos){
+    var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal, metodos);
     if(tsglobal.obtener(instruccion.identificador)!=undefined){
-        tsglobal.actualizar(instruccion.identificador, valor);
+        tsglobal.actualizar(instruccion.identificador, valor, metodos);
     }
 }
 
-function ejecutarasignacionlocal(instruccion, tsglobal, tslocal){
-    var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal);
+function ejecutarasignacionlocal(instruccion, tsglobal, tslocal, metodos){
+    var valor = procesarexpresion(instruccion.expresion,tsglobal, tslocal, metodos);
     if(tslocal.obtener(instruccion.identificador)!=undefined){
-        tslocal.actualizar(instruccion.identificador, valor);
+        tslocal.actualizar(instruccion.identificador, valor, metodos);
     }
     else if(tsglobal.obtener(instruccion.identificador)!=undefined){
-        tsglobal.actualizar(instruccion.identificador, valor);
+        tsglobal.actualizar(instruccion.identificador, valor, metodos);
     }
 }
 
-function procesarexpresion(expresion, tsglobal, tslocal){
+function procesarexpresion(expresion, tsglobal, tslocal, metodos){
     if(expresion.tipo == TIPO_OPERACION.SUMA){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         if(valorIzq.tipo == TIPO_DATO.DECIMAL && valorDer.tipo == TIPO_DATO.DECIMAL){
             return { tipo:TIPO_DATO.DECIMAL, valor: valorIzq.valor+valorDer.valor };
         }
@@ -158,8 +212,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.RESTA){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         if(valorIzq.tipo == TIPO_DATO.DECIMAL && valorDer.tipo == TIPO_DATO.DECIMAL){
             return { tipo:TIPO_DATO.DECIMAL, valor: valorIzq.valor-valorDer.valor };
         }
@@ -169,8 +223,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.MULTIPLICACION){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         if(valorIzq.tipo == TIPO_DATO.DECIMAL && valorDer.tipo == TIPO_DATO.DECIMAL){
             return { tipo:TIPO_DATO.DECIMAL, valor: valorIzq.valor*valorDer.valor };
         }
@@ -180,8 +234,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.DIVISION){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         
         if(valorDer.tipo == TIPO_DATO.DECIMAL && valorDer.valor == 0){
             console.log('Error semantico el divisor es 0');
@@ -196,8 +250,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.MENOR){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         switch(valorIzq.tipo){
             case TIPO_DATO.DECIMAL:
                 switch(valorDer.tipo){
@@ -243,8 +297,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.MAYOR){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         switch(valorIzq.tipo){
             case TIPO_DATO.DECIMAL:
                 switch(valorDer.tipo){
@@ -290,8 +344,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.MENORIGUAL){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         switch(valorIzq.tipo){
             case TIPO_DATO.DECIMAL:
                 switch(valorDer.tipo){
@@ -337,8 +391,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.MAYORIGUAL){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         switch(valorIzq.tipo){
             case TIPO_DATO.DECIMAL:
                 switch(valorDer.tipo){
@@ -384,8 +438,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.IGUALIGUAL){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         switch(valorIzq.tipo){
             case TIPO_DATO.DECIMAL:
                 switch(valorDer.tipo){
@@ -441,8 +495,8 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.NOIGUAL){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
-        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
+        var valorDer = procesarexpresion(expresion.operandoDer, tsglobal, tslocal, metodos);
         switch(valorIzq.tipo){
             case TIPO_DATO.DECIMAL:
                 switch(valorDer.tipo){
@@ -498,7 +552,7 @@ function procesarexpresion(expresion, tsglobal, tslocal){
         }
     }
     else if(expresion.tipo == TIPO_OPERACION.NEGATIVO){
-        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal);
+        var valorIzq = procesarexpresion(expresion.operandoIzq, tsglobal, tslocal, metodos);
         
         if(valorIzq.tipo == TIPO_DATO.DECIMAL){
             return { tipo:TIPO_DATO.DECIMAL, valor: valorIzq.valor*-1 };

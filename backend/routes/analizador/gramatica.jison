@@ -35,6 +35,7 @@
 ")"                     return 'parentesisc';
 "?"                     return 'signointerrogacion';
 ":"                     return 'dospuntos';
+","                     return 'coma';
 "si"                    return 'si';
 "sino"                  return 'sino';
 "exec"                  return 'exec';
@@ -86,17 +87,33 @@ CUERPO2
     | CUERPO2 WHILEE { $1.push($2); $$=$1; }
     | CUERPO2 SI { $1.push($2); $$=$1; }
     | CUERPO2 ASIGNACION { $1.push($2); $$=$1; }
+    | CUERPO2 LLAMADA { $1.push($2); $$=$1; }
     | DECLARACION { $$ = [$1]; }
     | IMPRIMIR { $$ = [$1]; }
     | SI { $$=[$1]; }
     | WHILEE { $$=[$1]; }
+    | LLAMADA { $$=[$1]; }
     | ASIGNACION { $$=[$1]; };
 
 MAIN
-    :exec identificador parentesisa parentesisc pcoma {$$=INSTRUCCIONES.nuevoMain($2, []);};
+    : exec identificador parentesisa VALORESLLAMADA parentesisc pcoma {$$=INSTRUCCIONES.nuevoMain($2, $4);}
+    | exec identificador parentesisa parentesisc pcoma {$$=INSTRUCCIONES.nuevoMain($2, []);};
+
+VALORESLLAMADA
+    : VALORESLLAMADA coma EXP {$1.push($3); $$=$1;}
+    | EXP {$$=[$1];};
+
+LLAMADA
+    : identificador parentesisa VALORESLLAMADA parentesisc pcoma {$$=INSTRUCCIONES.nuevaLlamada($1, $3);}
+    | identificador parentesisa parentesisc pcoma {$$=INSTRUCCIONES.nuevaLlamada($1, []);};
 
 METODO
-    : identificador igual mayor parentesisa parentesisc llavea CUERPO2 llavec {$$=INSTRUCCIONES.nuevoMetodo($1, [], $7)};
+    : identificador igual mayor parentesisa PARAMETROS parentesisc llavea CUERPO2 llavec {$$=INSTRUCCIONES.nuevoMetodo($1, $5, $8);}
+    | identificador igual mayor parentesisa parentesisc llavea CUERPO2 llavec {$$=INSTRUCCIONES.nuevoMetodo($1, [], $7)};
+
+PARAMETROS
+    : PARAMETROS coma TIPO identificador { $1.push(INSTRUCCIONES.nuevoParametro($3,$4)); $$=$1;}
+    | TIPO identificador { $$=[INSTRUCCIONES.nuevoParametro($1, $2)]; };
 
 ASIGNACION
     : identificador menor menos EXP pcoma { $$ = INSTRUCCIONES.nuevaAsignacion($1, $4); } ;
