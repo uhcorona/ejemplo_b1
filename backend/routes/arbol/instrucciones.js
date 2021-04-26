@@ -17,6 +17,7 @@ const TIPO_OPERACION = {
     MAYORIGUAL:         'OP_MAYORIGUAL',
     IGUALIGUAL:         'OP_IGUALIGUAL',
     NOIGUAL:            'OP_NOIGUAL',
+    TERNARIO:           'INSTR_TERNARIO'
 }
 
 const TIPO_INSTRUCCION = {
@@ -119,6 +120,14 @@ const INSTRUCCIONES = {
     nuevoBreak: function(){
         return {
             tipo: TIPO_INSTRUCCION.BREAK
+        }
+    },
+    nuevoTernario: function(tipo, condicion, valverdadero, valfalso){
+        return{
+            tipo: tipo,
+            condicion: condicion,
+            valverdadero: valverdadero,
+            valfalso: valfalso
         }
     }
 }

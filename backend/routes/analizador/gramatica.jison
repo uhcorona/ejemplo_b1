@@ -60,6 +60,7 @@
 %}
 
 // Precedencia de operadores
+%left 'signointerrogacion'
 %left 'menor' 'menorigual' 'mayor' 'mayorigual' 'igualigual' 'noigual'
 %left 'mas' 'menos'
 %left 'por' 'dividido'
@@ -146,7 +147,8 @@ TIPO
     | bandera                           { $$ = TIPO_DATO.BANDERA; };
 
 EXP
-    : EXP mas EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.SUMA, $1, $3); }
+    : EXP signointerrogacion EXP dospuntos EXP { $$ = INSTRUCCIONES.nuevoTernario(TIPO_OPERACION.TERNARIO, $1, $3, $5); }
+    | EXP mas EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.SUMA, $1, $3); }
     | EXP menos EXP                     { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.RESTA, $1, $3); }
     | EXP por EXP                       { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.MULTIPLICACION, $1, $3); }
     | EXP dividido EXP                  { $$ = INSTRUCCIONES.nuevaOperacionBinaria(TIPO_OPERACION.DIVISION, $1, $3); }

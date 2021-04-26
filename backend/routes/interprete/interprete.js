@@ -605,6 +605,17 @@ function procesarexpresion(expresion, tsglobal, tslocal, metodos){
     else if(expresion.tipo == TIPO_VALOR.BANDERA){
         return { tipo:TIPO_DATO.BANDERA, valor: expresion.valor}
     }
+    else if(expresion.tipo == TIPO_OPERACION.TERNARIO){
+        var condicion = procesarexpresion(expresion.condicion, tsglobal, tslocal, metodos);
+        if(condicion.valor == true){
+            var resultado= procesarexpresion(expresion.valverdadero, tslocal, tsglobal, metodos);
+            return resultado;
+        }
+        else if(condicion.valor == false){
+            var resultado= procesarexpresion(expresion.valfalso, tslocal, tsglobal, metodos);
+            return resultado;
+        }
+    }
     else if(expresion.tipo == TIPO_VALOR.IDENTIFICADOR){
         if(tslocal != undefined){
             var valorr = tslocal.obtener(expresion.valor);
