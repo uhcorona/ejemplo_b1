@@ -5,7 +5,7 @@ const TIPO_DATO = require('../arbol/tablasimbolos').TIPO_DATO;
 
 const TS = require('../arbol/tablasimbolos').TS;
 let salida = '';
-
+let banderaciclo = false;
 function ejecutar(arbol){
     salida='';
     let tsglobal = new TS([]);
@@ -69,7 +69,8 @@ function ejecutarbloqueglobal(instrucciones, tsglobal, tslocal, metodos, main){
 }
 
 function ejecutarbloquelocal(instrucciones, tsglobal, tslocal, metodos){
-    instrucciones.forEach((instruccion)=>{
+    for(var i=0; i<instrucciones.length; i++){
+        instruccion = instrucciones[i];
         if(instruccion.tipo == TIPO_INSTRUCCION.DECLARACION){
             ejecutardeclaracionlocal(instruccion, tsglobal,tslocal, metodos);
         }
@@ -78,22 +79,46 @@ function ejecutarbloquelocal(instrucciones, tsglobal, tslocal, metodos){
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.WHILEE){
             var tslocal2=new TS(tslocal._simbolos);
-            ejecutarwhile(instruccion, tsglobal, tslocal2, metodos);
+            var posibleretorno = ejecutarwhile(instruccion, tsglobal, tslocal2, metodos);
+            if(posibleretorno){
+                return posibleretorno;
+            }
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.IFF){
             var tslocal2=new TS(tslocal._simbolos);
             console.log('ufff')
             console.log(tslocal._simbolos);
             console.log(tslocal2._simbolos);
-            ejecutarif(instruccion, tsglobal, tslocal2, metodos);
+            var posibleretorno = ejecutarif(instruccion, tsglobal, tslocal2, metodos);
+            if(posibleretorno){
+                return posibleretorno;
+            }
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.ASIGNACION){
             ejecutarasignacionlocal(instruccion, tsglobal, tslocal, metodos);
         }
         else if(instruccion.tipo == TIPO_INSTRUCCION.LLAMADA){
-            ejecutarllamada(instruccion, tsglobal, tslocal, metodos);
+            if(banderaciclo==true){
+                banderaciclo = false;
+                ejecutarllamada(instruccion, tsglobal, tslocal, metodos);
+                banderaciclo = true;
+            }
+            else{
+                ejecutarllamada(instruccion, tsglobal, tslocal, metodos);
+            }
         }
-    });
+        else if(instruccion.tipo == TIPO_INSTRUCCION.BREAK){
+            if(banderaciclo){
+                return {
+                    tipo_resultado: TIPO_INSTRUCCION.BREAK,
+                    resultado: undefined
+                }
+            }
+            else {
+                console.log("No estas en un ciclo")
+            }
+        }
+    }
 }
 
 function ejecutarllamada(instruccion, tsglobal, tslocal, metodos){
@@ -133,21 +158,30 @@ function ejecutarllamada(instruccion, tsglobal, tslocal, metodos){
 function ejecutarif(instruccion, tsglobal, tslocal, metodos){
     var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal, metodos);
     if(valor.valor==true){
-        ejecutarbloquelocal(instruccion.cuerpoverdadero,tsglobal,tslocal, metodos);
+        return ejecutarbloquelocal(instruccion.cuerpoverdadero,tsglobal,tslocal, metodos);
     }
     else if(valor.valor==false){
         if(instruccion.cuerpofalso!=undefined){
-            ejecutarbloquelocal(instruccion.cuerpofalso,tsglobal,tslocal, metodos);
+            return ejecutarbloquelocal(instruccion.cuerpofalso,tsglobal,tslocal, metodos);
         }
     }
 }
 
 function ejecutarwhile(instruccion, tsglobal, tslocal, metodos){
+    banderaciclo = true;
     var valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal, metodos);
     while(valor.valor){
-        ejecutarbloquelocal(instruccion.instrucciones,tsglobal,tslocal, metodos);
+        var posiblevalor=ejecutarbloquelocal(instruccion.instrucciones,tsglobal,tslocal, metodos);
+        console.log(posiblevalor)
+        if(posiblevalor){
+            if(posiblevalor.tipo_resultado==TIPO_INSTRUCCION.BREAK){
+                banderaciclo = false;
+                break;
+            }
+        }
         valor = procesarexpresion(instruccion.condicion,tsglobal, tslocal, metodos);
     }
+    banderaciclo = false;
 }
 
 function ejecutardeclaracionglobal(instruccion, tsglobal, tslocal, metodos){

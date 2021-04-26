@@ -39,9 +39,11 @@
 "si"                    return 'si';
 "sino"                  return 'sino';
 "exec"                  return 'exec';
+"break"                 return 'breakk';
 
 \"[^\"]*\"                  { yytext = yytext.substr(1, yyleng-2); return 'cadenaa'; }
 [0-9]+("."[0-9]+)?\b        return 'decimall';
+\'[^\']?\'                  { yytext = yytext.substr(1, yyleng-2); return 'caracterr'; }
 ([a-zA-Z])[a-zA-Z0-9_]*     return 'identificador';
 
 <<EOF>>                 return 'EOF';
@@ -81,6 +83,9 @@ CUERPO
     | METODO { $$=[$1]; }
     | MAIN { $$=[$1]; };
 
+BREAKK
+    : breakk pcoma {$$=INSTRUCCIONES.nuevoBreak();};
+
 CUERPO2
     : CUERPO2 DECLARACION { $1.push($2); $$=$1; }
     | CUERPO2 IMPRIMIR { $1.push($2); $$=$1; }
@@ -88,12 +93,14 @@ CUERPO2
     | CUERPO2 SI { $1.push($2); $$=$1; }
     | CUERPO2 ASIGNACION { $1.push($2); $$=$1; }
     | CUERPO2 LLAMADA { $1.push($2); $$=$1; }
+    | CUERPO2 BREAKK { $1.push($2); $$=$1; }
     | DECLARACION { $$ = [$1]; }
     | IMPRIMIR { $$ = [$1]; }
     | SI { $$=[$1]; }
     | WHILEE { $$=[$1]; }
     | LLAMADA { $$=[$1]; }
-    | ASIGNACION { $$=[$1]; };
+    | ASIGNACION { $$=[$1]; }
+    | BREAKK { $$=[$1]; };
 
 MAIN
     : exec identificador parentesisa VALORESLLAMADA parentesisc pcoma {$$=INSTRUCCIONES.nuevoMain($2, $4);}
@@ -130,7 +137,8 @@ WHILEE
 
 SI
     :si parentesisa EXP parentesisc llavea CUERPO2 llavec sino llavea CUERPO2 llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, $10); }
-    |si parentesisa EXP parentesisc llavea CUERPO2 llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, undefined); };
+    |si parentesisa EXP parentesisc llavea CUERPO2 llavec { $$=INSTRUCCIONES.nuevoIf($3, $6, undefined); }
+    |si parentesisa EXP parentesisc llavea CUERPO2 llavec sino SI { $$=INSTRUCCIONES.nuevoIf($3, $6, [$9]); };
 
 TIPO
     : decimal                           { $$ = TIPO_DATO.DECIMAL; }

@@ -27,7 +27,8 @@ const TIPO_INSTRUCCION = {
     ASIGNACION:         'INSTR_ASIGNACION',
     METODO:             'INSTR_METODO',
     MAIN:               'INSTR_MAIN',
-    LLAMADA:            'INSTR_LLAMADA'
+    LLAMADA:            'INSTR_LLAMADA',
+    BREAK:              'INSTR_BREAK'
 }
 
 const INSTRUCCIONES = {
@@ -113,6 +114,11 @@ const INSTRUCCIONES = {
         return{
             tipo: tipo,
             identificador: identificador
+        }
+    },
+    nuevoBreak: function(){
+        return {
+            tipo: TIPO_INSTRUCCION.BREAK
         }
     }
 }
