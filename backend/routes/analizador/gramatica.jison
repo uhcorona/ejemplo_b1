@@ -82,7 +82,8 @@ CUERPO
     | DECLARACION { $$ = [$1]; }
     | ASIGNACION { $$=[$1]; }
     | METODO { $$=[$1]; }
-    | MAIN { $$=[$1]; };
+    | MAIN { $$=[$1]; }
+    | error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this.$.first_line + ', en la columna: ' + this.$.first_column); };
 
 BREAKK
     : breakk pcoma {$$=INSTRUCCIONES.nuevoBreak();};
@@ -101,7 +102,8 @@ CUERPO2
     | WHILEE { $$=[$1]; }
     | LLAMADA { $$=[$1]; }
     | ASIGNACION { $$=[$1]; }
-    | BREAKK { $$=[$1]; };
+    | BREAKK { $$=[$1]; }
+    | error { console.error('Este es un error sintáctico: ' + yytext + ', en la linea: ' + this.$.first_line + ', en la columna: ' + this.$.first_column); } ;
 
 MAIN
     : exec identificador parentesisa VALORESLLAMADA parentesisc pcoma {$$=INSTRUCCIONES.nuevoMain($2, $4);}
